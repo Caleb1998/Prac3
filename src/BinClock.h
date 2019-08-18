@@ -15,6 +15,7 @@ void secPWM(int units);
 void hourInc(void);
 void minInc(void);
 void toggleTime(void);
+void keyboardInterrupt(int sig);
 
 // define constants
 const char RTCAddr = 0x6f;

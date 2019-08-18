@@ -12,6 +12,7 @@
 #include <wiringPiI2C.h>
 #include <stdio.h> //For printf functions
 #include <stdlib.h> // For system functions
+#include <signal.h> //for keyboard interrupt
 
 #include "BinClock.h"
 #include "CurrentTime.h"
@@ -22,6 +23,10 @@ long lastInterruptTime = 0; //Used for button debounce
 int RTC; //Holds the RTC instance
 
 int HH,MM,SS;
+
+
+
+
 
 void initGPIO(void){
 	/* 
@@ -67,23 +72,28 @@ void initGPIO(void){
  */
 int main(void){
 	initGPIO();
-
+	(void) signal(SIGINT, keyboardInterrupt);
 	//Set random time (3:04PM)
 	//You can comment this file out later
-	wiringPiI2CWriteReg8(RTC, HOUR, 0x13+TIMEZONE);
-	wiringPiI2CWriteReg8(RTC, MIN, 0x4);
-	wiringPiI2CWriteReg8(RTC, SEC, 0x00);
-	
+	wiringPiI2CWriteReg8(RTC, HOUR, 0x23);
+	wiringPiI2CWriteReg8(RTC, MIN, 0x59);
+	wiringPiI2CWriteReg8(RTC, SEC, 0x50+0b10000000);
+	//toggleTime();
 	// Repeat this until we shut down
 	for (;;){
 		//Fetch the time from the RTC
+		secs =hexCompensation(wiringPiI2CReadReg8(RTC,SEC)-0b10000000);//-0b1000000 not neccesary with btns
+		mins =hexCompensation(wiringPiI2CReadReg8(RTC,MIN));
+		hours = hexCompensation(wiringPiI2CReadReg8(RTC,HOUR));
+		lightHours(hFormat(hours));
+		//wiringPiI2CReadReg8(RTC,SEC);
 		//Write your logic here
 		
 		//Function calls to toggle LEDs
 		//Write your logic here
 		
 		// Print out the time we have stored on our RTC
-		printf("The current time is: %x:%x:%x\n", hours, mins, secs);
+		printf("The current time is:%d:%d:%d \n",hFormat(hours), mins, secs);
 
 		//using a delay to make our program "less CPU hungry"
 		delay(1000); //milliseconds
@@ -108,8 +118,34 @@ int hFormat(int hours){
 /*
  * Turns on corresponding LED's for hours
  */
+
 void lightHours(int units){
 	// Write your logic to light up the hour LEDs here	
+	if((units&0b0001)==1){digitalWrite(LEDS[0],1);//if statement for LED 0
+	printf("LED 0 is high");
+	}
+	else{digitalWrite(LEDS[0],0);
+	}
+
+	if((units&0b0010)==0b10){digitalWrite(LEDS[1],1);
+	printf("LED 1 is high");
+	}//if statement for LED 1
+	else{digitalWrite(LEDS[1],0);
+	}
+
+	if((units&0b0100)==0b100){digitalWrite(LEDS[2],1);
+	printf("LED2 is high");
+	}
+	else{digitalWrite(LEDS[2],0);
+	}
+
+	if((units&0b1000)==0b1000){digitalWrite(LEDS[3],1);
+	printf("LED3 is high");
+	}
+	else{
+	digitalWrite(LEDS[3],0);
+	}
+
 }
 
 /*
@@ -117,6 +153,12 @@ void lightHours(int units){
  */
 void lightMins(int units){
 	//Write your logic to light up the minute LEDs here
+	if((units&0b000001)==1){
+	digitalWrite(LEDS[4],1);
+	}else{
+	digitalWrite(LEDS[4],0);
+	}
+
 }
 
 /*
@@ -231,7 +273,7 @@ void toggleTime(void){
 		MM = getMins();
 		SS = getSecs();
 
-		HH = hFormat(HH);
+		//HH = hFormat(HH);
 		HH = decCompensation(HH);
 		wiringPiI2CWriteReg8(RTC, HOUR, HH);
 
@@ -243,4 +285,11 @@ void toggleTime(void){
 
 	}
 	lastInterruptTime = interruptTime;
+}
+
+
+
+void keyboardInterrupt(int sig){
+printf("Interrupt detected, doesnt run for loop for asome reason ");
+exit(0);
 }
