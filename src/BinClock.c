@@ -86,8 +86,8 @@ int main(void){
 		mins =hexCompensation(wiringPiI2CReadReg8(RTC,MIN));
 		hours = hexCompensation(wiringPiI2CReadReg8(RTC,HOUR));
 		lightHours(hFormat(hours));
-		lightMins(hours);
-		secPWM(hours);
+		lightMins(mins);
+		secPWM(secs);
 		//wiringPiI2CReadReg8(RTC,SEC);
 		//Write your logic here
 		
