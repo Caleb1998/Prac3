@@ -331,6 +331,7 @@ printf("interrupt from keyboard\n");
 for(int i=0;i<sizeof(LEDS);i++){
 digitalWrite(LEDS[i],0);
 }
+pwmWrite(SECS,0);
 printf("All outputs set to zero");
 exit(0);
 }
