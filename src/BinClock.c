@@ -327,7 +327,7 @@ void toggleTime(void){
 
 
 void keyboardInterrupt(int signum){//GPIO cleanup function
-printf("interrupt from keyboard\n");
+printf("Interrupt from keyboard\n");
 for(int i=0;i<sizeof(LEDS);i++){
 digitalWrite(LEDS[i],0);
 }
